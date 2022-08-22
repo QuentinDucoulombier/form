@@ -295,7 +295,7 @@ public class FolderController extends ControllerHelper {
                                 form.put(ARCHIVED, true);
                                 Promise<JsonObject> promise = Promise.promise();
                                 syncFutures.add(promise.future());
-                                formService.update(formId, form, FutureHelper.handlerJsonObject(promise));
+                                formService.update(formId, form, FutureHelper.handler(promise));
                             }
 
                             CompositeFuture.all(syncFutures).onComplete(evt -> {

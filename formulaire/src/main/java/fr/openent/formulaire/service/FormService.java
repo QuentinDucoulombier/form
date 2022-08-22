@@ -1,8 +1,8 @@
 package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
@@ -20,9 +20,9 @@ public interface FormService {
     /**
      * List all forms by ids
      * @param formIds list of form ids
-     * @param handler function handler returning JsonArray data
+     * @return Future {@link Future<JsonArray>} containing forms
      */
-    void listByIds(JsonArray formIds, Handler<Either<String, JsonArray>> handler);
+    Future<JsonArray> listByIds(JsonArray formIds);
 
     /**
      * List all the forms sent to me
@@ -96,9 +96,9 @@ public interface FormService {
     /**
      * Update multiple forms
      * @param forms JsonArray data
-     * @param handler function handler returning JsonArray data
+     * @return Future {@link Future<JsonArray>} containing updated forms
      */
-    void updateMultiple(JsonArray forms, Handler<Either<String, JsonArray>> handler);
+    Future<JsonArray> updateMultiple(JsonArray forms);
 
     /**
      * Delete a scpecific form
@@ -130,4 +130,13 @@ public interface FormService {
      * @param handler function handler returning JsonObject data
      */
     void checkFormsRights (List<String> groupsAndUserIds, UserInfos user, String right, JsonArray formIds, Handler<Either<String, JsonObject>> handler);
+
+    /** Check if the connected user has the rights on a list of specific forms
+     * @param groupsAndUserIds list of neo ids including the connected user
+     * @param user user connected
+     * @param right right to check
+     * @param formIds form identifiers
+     * @return Future {@link Future <JsonObject>} containing number of forms where connected user has the right
+     */
+    Future<JsonObject> checkFormsRights(List<String> groupsAndUserIds, UserInfos user, String right, JsonArray formIds);
 }

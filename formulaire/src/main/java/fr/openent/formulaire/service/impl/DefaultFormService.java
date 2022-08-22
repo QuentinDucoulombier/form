@@ -1,8 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -56,10 +59,16 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void listByIds(JsonArray formIds, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> listByIds(JsonArray formIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
         String query = "SELECT * FROM " + FORM_TABLE + " WHERE id IN " + Sql.listPrepared(formIds) + ";";
         JsonArray params = new JsonArray().addAll(formIds);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+
+        String errorMessage = "[Formulaire@listByIds] Failed to list forms with ids " + formIds + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handler(promise, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
@@ -329,7 +338,9 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void updateMultiple(JsonArray forms, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> updateMultiple(JsonArray forms) {
+        Promise<JsonArray> promise = Promise.promise();
+
         if (!forms.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
 
@@ -375,11 +386,14 @@ public class DefaultFormService implements FormService {
             }
             s.raw("COMMIT;");
 
-            sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
+            String errorMessage = "[Formulaire@updateMultipleForms] Fail to update forms : ";
+            sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handler(promise, errorMessage)));
         }
         else {
-            handler.handle(new Either.Right<>(new JsonArray()));
+            promise.complete(new JsonArray());
         }
+
+        return promise.future();
     }
 
     @Override
@@ -425,5 +439,23 @@ public class DefaultFormService implements FormService {
                 .addAll(formIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public Future<JsonObject> checkFormsRights(List<String> groupsAndUserIds, UserInfos user, String right, JsonArray formIds) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String query = "SELECT COUNT(DISTINCT f.id) FROM " + FORM_TABLE + " f " +
+                "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE ((member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action = ?) OR owner_id = ?) AND id IN " + Sql.listPrepared(formIds);
+        JsonArray params = (new fr.wseduc.webutils.collections.JsonArray(groupsAndUserIds))
+                .add(right)
+                .add(user.getUserId())
+                .addAll(formIds);
+
+        String errorMessage = "[Formulaire@checkFormsRights] Fail to check rights for method : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handler(promise, errorMessage)));
+
+        return promise.future();
     }
 }

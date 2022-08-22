@@ -1,8 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.service.RelFormFolderService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -111,17 +114,40 @@ public class DefaultRelFormFolderService implements RelFormFolderService {
     public void updateForRestoration(JsonArray formIds, Handler<Either<String, JsonArray>> handler) {
         String query = "UPDATE " + REL_FORM_FOLDER_TABLE + " rff SET folder_id = folder_target " +
                 "FROM (" +
-                    "SELECT owner_id AS member_id, id AS form_id, 1 AS folder_target FROM " + FORM_TABLE + " " +
-                    "WHERE id IN " + Sql.listPrepared(formIds) +
-                    "UNION " +
-                    "SELECT DISTINCT fs.member_id, fs.resource_id, 2 AS folder_target FROM " + FORM_TABLE + " f " +
-                    "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
-                    "WHERE f.id IN " + Sql.listPrepared(formIds) + " AND fs.action = ? " +
+                "SELECT owner_id AS member_id, id AS form_id, 1 AS folder_target FROM " + FORM_TABLE + " " +
+                "WHERE id IN " + Sql.listPrepared(formIds) +
+                "UNION " +
+                "SELECT DISTINCT fs.member_id, fs.resource_id, 2 AS folder_target FROM " + FORM_TABLE + " f " +
+                "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE f.id IN " + Sql.listPrepared(formIds) + " AND fs.action = ? " +
                 ") AS contributors " +
                 "WHERE rff.user_id = contributors.member_id AND rff.form_id = contributors.form_id " +
                 "RETURNING *;";
         JsonArray params = new JsonArray().addAll(formIds).addAll(formIds).add(CONTRIB_RESOURCE_BEHAVIOUR);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public Future<JsonArray> updateForRestoration(JsonArray formIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String query = "UPDATE " + REL_FORM_FOLDER_TABLE + " rff SET folder_id = folder_target " +
+                "FROM (" +
+                "SELECT owner_id AS member_id, id AS form_id, 1 AS folder_target FROM " + FORM_TABLE + " " +
+                "WHERE id IN " + Sql.listPrepared(formIds) +
+                "UNION " +
+                "SELECT DISTINCT fs.member_id, fs.resource_id, 2 AS folder_target FROM " + FORM_TABLE + " f " +
+                "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE f.id IN " + Sql.listPrepared(formIds) + " AND fs.action = ? " +
+                ") AS contributors " +
+                "WHERE rff.user_id = contributors.member_id AND rff.form_id = contributors.form_id " +
+                "RETURNING *;";
+        JsonArray params = new JsonArray().addAll(formIds).addAll(formIds).add(CONTRIB_RESOURCE_BEHAVIOUR);
+
+        String errorMessage = "[Formulaire@updateForRestoration] Failed to update relation form-folders for forms with id " + formIds + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handler(promise, errorMessage)));
+
+        return promise.future();
     }
 }

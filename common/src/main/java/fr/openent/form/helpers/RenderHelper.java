@@ -37,4 +37,26 @@ public class RenderHelper {
         JsonObject error = (new JsonObject()).put(ERROR, message);
         renderJson(request, error, 500);
     }
+
+    public static void renderPromiseError(HttpServerRequest request, JsonObject err) {
+        // TODO render badRequest, unauthorized, internalError, notFound etc. accordingly
+        // TODO question is : how can we return Future.failedFuture(JsonObject); to get err to be a JsonObject
+        int status = err.getInteger("status");
+        String message = "";
+
+        switch(status) {
+            case 400:
+                message = "";
+                break;
+            case 500:
+                message = "";
+                break;
+            default:
+                message = "";
+                break;
+        }
+
+        JsonObject error = (new JsonObject()).put(ERROR, message);
+        renderJson(request, error, 500);
+    }
 }

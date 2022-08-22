@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -77,4 +78,11 @@ public interface RelFormFolderService {
      * @param handler       function handler returning JsonArray data
      */
     void updateForRestoration(JsonArray formIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Update multiple relations form-folder for restoration purpose
+     * @param formIds       form identifiers
+     * @return Future {@link Future <JsonArray>} containing updated relations form-folder
+     */
+    Future<JsonArray> updateForRestoration(JsonArray formIds);
 }

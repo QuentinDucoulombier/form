@@ -42,6 +42,6 @@ public class DefaultFormServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultFormService.listByIds(formIds, null);
+        defaultFormService.listByIds(formIds);
     }
 }

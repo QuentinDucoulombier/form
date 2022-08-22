@@ -505,7 +505,7 @@ public class FormController extends ControllerHelper {
         for (int i = 0; i < formIds.size(); i++) {
             Promise<JsonArray> promise = Promise.promise();
             formsInfos.add(promise.future());
-            formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
+            formService.duplicate(formIds.getInteger(i), user, FutureHelper.handler(promise));
         }
         CompositeFuture.all(formsInfos).onComplete(formsInfosEvt -> {
             if (formsInfosEvt.failed()) {
@@ -534,7 +534,7 @@ public class FormController extends ControllerHelper {
                     if (question_type == 4 || question_type == 5 || question_type == 9) {
                         Promise<JsonObject> promise = Promise.promise();
                         questionsInfosFutures.add(promise.future());
-                        questionChoiceService.duplicate(formId, questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
+                        questionChoiceService.duplicate(formId, questionId, originalQuestionId, FutureHelper.handler(promise));
                     }
                 }
             }
@@ -857,51 +857,36 @@ public class FormController extends ControllerHelper {
                     groupsAndUserIds.addAll(user.getGroupsIds());
                 }
 
-                formService.checkFormsRights(groupsAndUserIds, user, CONTRIB_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
-                    if (hasRightsEvt.isLeft()) {
-                        log.error("[Formulaire@restoreForms] Fail to check rights for method : " + hasRightsEvt.left().getValue());
-                        renderInternalError(request, hasRightsEvt);
-                        return;
-                    }
-                    if (hasRightsEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@restoreForms] No rights found for forms with ids " + formIds;
-                        log.error(message);
-                        notFound(request, message);
-                        return;
-                    }
-
-                    // Check if user is owner or contributor to all the forms
-                    Long count = hasRightsEvt.right().getValue().getLong(COUNT);
-                    if (count == null || count != formIds.size()) {
-                        String message = "[Formulaire@restoreForms] You're missing rights on one form or more.";
-                        log.error(message);
-                        unauthorized(request, message);
-                        return;
-                    }
-
-                    relFormFolderService.updateForRestoration(formIds, relFormFolderEvt -> {
-                        if (relFormFolderEvt.isLeft()) {
-                            log.error("[Formulaire@restoreForms] Failed to update relation form-folders for forms with id " + formIds + " : " + relFormFolderEvt.left().getValue());
-                            renderInternalError(request, relFormFolderEvt);
-                            return;
+                formService.checkFormsRights(groupsAndUserIds, user, CONTRIB_RESOURCE_BEHAVIOUR, formIds)
+                    .compose(rights -> {
+                        if (rights.isEmpty()) {
+                            String message = "[Formulaire@restoreForms] No rights found for forms with ids " + formIds;
+                            log.error(message);
+//                            notFound(request, message);
+                            return Future.failedFuture(message); // TODO How can we return JsonObject
                         }
 
-                        formService.listByIds(formIds, formsEvt -> {
-                            if (formsEvt.isLeft()) {
-                                log.error("[Formulaire@restoreForms] Failed to list forms with ids " + formIds + " : " + formsEvt.left().getValue());
-                                renderInternalError(request, formsEvt);
-                                return;
-                            }
+                        // Check if user is owner or contributor to all the forms
+                        Long count = rights.getLong(COUNT);
+                        if (count == null || count != formIds.size()) {
+                            String message = "[Formulaire@restoreForms] You're missing rights on one form or more.";
+                            log.error(message);
+//                            unauthorized(request, message);
+                            return Future.failedFuture(message); // TODO How can we return JsonObject
+                        }
 
-                            JsonArray forms = formsEvt.right().getValue();
-                            for (int i = 0; i < forms.size(); i++) {
-                                forms.getJsonObject(i).put(ARCHIVED, false);
-                            }
+                        return relFormFolderService.updateForRestoration(formIds);
+                    })
+                    .compose(relFormFolders -> formService.listByIds(formIds))
+                    .compose(forms -> {
+                        for (int i = 0; i < forms.size(); i++) {
+                            forms.getJsonObject(i).put(ARCHIVED, false);
+                        }
 
-                            formService.updateMultiple(forms, arrayResponseHandler(request));
-                        });
-                    });
-                });
+                        return formService.updateMultiple(forms);
+                    })
+                    .onSuccess(updatedForms -> renderJson(request, updatedForms))
+                    .onFailure(err -> renderInternalError(request, err.getMessage())); // TODO see RenderHelper.renderPromiseError()
             });
         });
     }

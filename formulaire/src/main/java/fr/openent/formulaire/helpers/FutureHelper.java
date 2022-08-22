@@ -19,26 +19,19 @@ public class FutureHelper {
 
     // Promise
 
-    public static Handler<Either<String, JsonArray>> handlerJsonArray(Promise<JsonArray> future) {
+    public static <R> Handler<Either<String, R>> handler(Promise<R> promise, String errorMessage) {
         return event -> {
             if (event.isRight()) {
-                future.complete(event.right().getValue());
-            } else {
-                log.error(event.left().getValue());
-                future.fail(event.left().getValue());
+                promise.complete(event.right().getValue());
+                return;
             }
+            log.error((errorMessage != null ? errorMessage : "") + event.left().getValue());
+            promise.fail(errorMessage != null ? errorMessage : event.left().getValue());
         };
     }
 
-    public static Handler<Either<String, JsonObject>> handlerJsonObject(Promise<JsonObject> future) {
-        return event -> {
-            if (event.isRight()) {
-                future.complete(event.right().getValue());
-            } else {
-                log.error(event.left().getValue());
-                future.fail(event.left().getValue());
-            }
-        };
+    public static <R> Handler<Either<String, R>> handler(Promise<R> promise) {
+        return handler(promise, null);
     }
 
     // AsyncResult
