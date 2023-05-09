@@ -36,7 +36,9 @@
     "ts-loader": "^3.2.0",
     "apexcharts": "3.36.3",
     "sortablejs": "^1.15.0",
-    "clipboard": "^2.0.11"
+    "clipboard": "^2.0.11",
+    "d3": "6.7.0",
+    "dagre-d3": "0.6.4"
   },
   "devDependencies": {
     "@mdi/font": "^4.5.95",
@@ -55,6 +57,7 @@
     "moment": "^2.21.0",
     "natives": "^1.1.6",
     "ts-jest": "^22.4.2",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "@types/d3": "7.4.0"
   }
 }

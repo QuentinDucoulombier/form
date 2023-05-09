@@ -10,6 +10,7 @@ export abstract class FormElement implements Selectable {
     form_element_type: FormElementType;
     nb_responses: number;
     selected: boolean;
+    label: string;
 
     protected constructor() {
         this.id = null;
@@ -18,6 +19,7 @@ export abstract class FormElement implements Selectable {
         this.position = null;
         this.nb_responses = 0;
         this.selected = null;
+        this.label = null;
     }
 
     toJson() : Object {
@@ -28,16 +30,17 @@ export abstract class FormElement implements Selectable {
             position: this.position,
             form_element_type: this.form_element_type,
             nb_responses: this.nb_responses,
-            selected: this.selected
+            selected: this.selected,
+            label: this.label
         }
     }
 
     isSection = () : boolean => {
-        return this.form_element_type === FormElementType.SECTION;
+        return this.form_element_type === FormElementType.SECTION || this instanceof Section;
     }
 
     isQuestion = () : boolean => {
-        return this.form_element_type === FormElementType.QUESTION;
+        return this.form_element_type === FormElementType.QUESTION || this instanceof Question;
     }
 
     isSameQuestionType = (formElement: FormElement) : boolean => {
@@ -74,5 +77,23 @@ export abstract class FormElement implements Selectable {
     getFollowingFormElementPosition = (formElements: FormElements) : number => {
         let nextFormElement: FormElement = this.getFollowingFormElement(formElements);
         return nextFormElement ? nextFormElement.position : null;
+    }
+
+    getNextFormElementId = (formElements: FormElements) : number => {
+        let nextFormElement: FormElement = this instanceof Section ?
+            this.getNextFormElement(formElements) :
+            this.getFollowingFormElement(formElements);
+        return nextFormElement ? nextFormElement.id : null;
+    }
+
+    setTreeNodeLabel = () : void => {
+        let label: string = this.title;
+        if (this.id && this instanceof Section) {
+            if (this.questions.all.length > 0) label += "\n";
+            for (let question of this.questions.all) {
+                label += "\n- " + question.title;
+            }
+        }
+        this.label = label;
     }
 }

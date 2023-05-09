@@ -19,7 +19,7 @@ import {
 	Pages
 } from "@common/core/enums";
 import {FormElementUtils, I18nUtils} from "@common/utils";
-import * as Clipboard from "clipboard";
+import Clipboard from "clipboard";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
 	($scope, route, $location) => {
@@ -109,6 +109,21 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					if ($scope.form.id) {
 						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR);
 						template.open('main', 'containers/edit-form');
+					}
+					else {
+						$scope.redirectTo('/list/mine');
+					}
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
+			treeViewForm: async (params) => {
+				$scope.currentPage = Pages.VISUALIZE_FORM;
+				await $scope.getFormWithRights(params.formId);
+				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
+					if ($scope.form.id) {
+						template.open('main', 'containers/tree-view');
 					}
 					else {
 						$scope.redirectTo('/list/mine');
