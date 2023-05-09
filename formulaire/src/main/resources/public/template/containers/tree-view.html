@@ -1,0 +1,31 @@
+<div ng-controller="FormTreeViewController as vm">
+    <div class="row">
+        <section class="cell six">
+            <div>
+                <h1>
+                    <a href="#/list/mine"><i18n>formulaire.title</i18n></a><i18n>formulaire.separator</i18n>[[form.title]]
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell six">
+            <div class="main-button">
+                <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.return</i18n></button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Loader -->
+    <div ng-if="vm.loading" class="twelve loader">
+        <loader min-height="'10px'"/>
+    </div>
+
+    <div class="tree-view">
+        <!-- div vouée à changer/dsiparaîrte (peut être) lors de l'implémentation correcte de la lib D3 -->
+        <div style="overflow-x: scroll;">
+            <svg>
+                <g></g>
+            </svg>
+        </div>
+    </div>
+</div>

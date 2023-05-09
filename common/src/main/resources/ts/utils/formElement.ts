@@ -25,6 +25,9 @@ export class FormElementUtils {
         }
     };
 
+    /**
+     * @deprecated Should instead use method isQuestion() from FormElement model directly
+     */
     static isQuestion = (formElement: FormElement) : boolean => {
         return formElement instanceof Question;
     };

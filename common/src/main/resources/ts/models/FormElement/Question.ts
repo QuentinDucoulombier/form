@@ -1,7 +1,7 @@
 import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionChoiceService, questionService} from "../../services";
-import {FormElements, QuestionChoice, QuestionChoices, Section, Sections} from "@common/models";
+import {FormElements, QuestionChoice, QuestionChoices, Section} from "@common/models";
 import {Types} from "@common/models";
 import {FormElement} from "./FormElement";
 import {Distribution, Distributions} from "@common/models";
@@ -268,6 +268,11 @@ export class Question extends FormElement {
     getParentSection = (formElements: FormElements) : Section => {
         let parents: FormElement[] = formElements.all.filter((e: FormElement) => e.id === this.section_id && e instanceof Section);
         return parents.length == 1 ? <Section>parents[0] : null;
+    }
+
+    getNextFormElements = (formElements: FormElements) : FormElement[] => {
+        if (!this.conditional || this.choices.all.length <= 0) return [];
+        return this.choices.all.map((c: QuestionChoice) => c.getNextFormElement(formElements));
     }
 }
 

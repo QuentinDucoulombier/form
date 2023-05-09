@@ -94,6 +94,7 @@
   "formulaire.selected.value": "Selected value: ",
   "formulaire.selected.values": "Selected values",
   "formulaire.position.selected": "Selected position",
+  "formulaire.visualize.path": "Visualize paths",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "A public form is anonymous and must necessarily have an end date. It is not possible to convert a public form into a private form and vice versa.",

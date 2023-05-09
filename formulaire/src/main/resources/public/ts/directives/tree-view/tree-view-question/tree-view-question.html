@@ -1,0 +1,16 @@
+<div class="tree-view-question"
+     style="background: white;
+            height: 32px;
+            width: calc(((100vw - 70px - 32px) / 3) - 16px);
+            min-width: calc(300px - 16px);
+            margin: 0 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px 2px #bfbfbf7d;
+            display: flex;
+            align-items: center;">
+    <img style="margin: 0 16px;"
+         ng-src="[[(vm.iconUtils.displayTypeIcon(vm.question.question_type)) || '/formulaire/public/img/empty-image.png']]"/>
+    <div class="main">
+        <span class="title">[[vm.question.title]]</span>
+    </div>
+</div>

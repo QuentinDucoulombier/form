@@ -17,6 +17,7 @@
                         <i class="i-clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
                     </div>
                     <button class="cell cancel dontSave" navigation-trigger="redirectTo('/list/mine')"><i18n>formulaire.return</i18n></button>
+                    <button class="cell cancel" ng-click="vm.goTreeView()"><i18n>formulaire.visualize.path</i18n></button>
                     <button class="cell" ng-class="{cancel: vm.form.nb_responses <= 0}"
                             ng-click="vm.organizeFormElements()" ng-disabled="vm.form.nb_responses > 0">
                         <i18n>formulaire.organize</i18n>

@@ -1,0 +1,34 @@
+<div class="tree-view-section"
+     style="background: white;
+            width: calc((100vw - 70px - 32px) /3);
+            min-width: 300px;
+            margin: 0 8px;
+            border-radius: 3px;
+            box-shadow: 0 2px 5px 2px #bfbfbf7d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;">
+
+    <div class="top twelve"
+         style="background: blue;
+                color: white;
+                min-height: 32px;
+                border-radius: 3px 3px 0 0;
+                display: flex;
+                align-items: center;">
+        <span class="title" style="margin-left: 8px;">[[vm.section.title]]</span>
+    </div>
+
+    <div class="main twelve"
+         style="min-height: 32px;
+                padding: 16px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;">
+        <div ng-repeat="question in vm.section.questions.all | orderBy:'section_position'">
+            <tree-view-question question="question"></tree-view-question>
+        </div>
+    </div>
+
+</div>

@@ -1,7 +1,7 @@
 import {idiom, idiom as lang} from 'entcore';
 import {Question, QuestionChoice, Response, Types} from "@common/models";
 import {ColorUtils} from "@common/utils/color";
-import * as ApexCharts from 'apexcharts';
+import ApexCharts from 'apexcharts';
 
 export class GraphUtils {
 

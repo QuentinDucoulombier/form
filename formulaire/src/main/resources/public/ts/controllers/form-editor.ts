@@ -33,6 +33,7 @@ import {FormElementUtils} from "@common/utils";
 import {Constants} from "@common/core/constants";
 import {PropPosition} from "@common/core/enums/prop-position";
 import {FormElementType} from "@common/core/enums/form-element-type";
+import {IconUtils} from "@common/utils/icon";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -62,6 +63,7 @@ interface ViewModel {
     };
     PreviewPage: typeof PreviewPage;
     nestedSortables: any[];
+    iconUtils: IconUtils;
 
     $onInit() : Promise<void>;
 
@@ -70,6 +72,7 @@ interface ViewModel {
     return() : Promise<void>;
     createNewElement(parentSection?: Section) : Promise<void>;
     doCreateNewElement(code?: number, parentSection?: Section) : void;
+    goTreeView(): void;
     organizeFormElements() : Promise<void>;
     doOrganizeFormElements() : Promise<void>;
     cancelOrganizeFormElements() : Promise<void>;
@@ -82,7 +85,6 @@ interface ViewModel {
     closeLightbox(action: string): void;
     displayTypeName(typeInfo: string) : string;
     displayTypeDescription(description : string) : string;
-    displayTypeIcon(code: number) : string;
     moveQuestion(formElement: FormElement, direction: string) : void;
 
     // Preview functions
@@ -114,6 +116,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
         vm.PreviewPage = PreviewPage;
         vm.nestedSortables = [];
+        vm.iconUtils = IconUtils;
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
@@ -229,6 +232,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             template.close('lightbox');
             vm.dontSave = false;
             $scope.safeApply();
+        };
+
+        vm.goTreeView = () : void => {
+            $scope.redirectTo(`/form/${vm.form.id}/tree`);
         };
 
         vm.organizeFormElements = async () : Promise<void> => {
@@ -441,35 +448,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.displayTypeDescription = (description : string|number) :string => {
             return idiom.translate("formulaire.question.type.description." + description);
-        };
-
-        vm.displayTypeIcon = (code: number) : string => {
-            switch (code) {
-                case 1 :
-                    return "/formulaire/public/img/question_type/long-answer.svg";
-                case 2 :
-                    return "/formulaire/public/img/question_type/short-answer.svg";
-                case 3 :
-                    return "/formulaire/public/img/question_type/free-text.svg";
-                case 4 :
-                    return "/formulaire/public/img/question_type/unic-answer.svg";
-                case 5 :
-                    return "/formulaire/public/img/question_type/multiple-answer.svg";
-                case 6 :
-                    return "/formulaire/public/img/question_type/date.svg";
-                case 7 :
-                    return "/formulaire/public/img/question_type/time.svg";
-                case 8 :
-                    return "/formulaire/public/img/question_type/file.svg";
-                case 9:
-                    return "/formulaire/public/img/question_type/singleanswer_radio.svg";
-                case 10:
-                    return "/formulaire/public/img/question_type/matrix.svg";
-                case 11:
-                    return "/formulaire/public/img/question_type/cursor.svg";
-                case 12:
-                    return "/formulaire/public/img/question_type/ranking.svg";
-            }
         };
 
         vm.moveQuestion = (formElement: FormElement, direction: string) : void => {

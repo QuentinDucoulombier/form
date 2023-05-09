@@ -1,4 +1,5 @@
 export * from './FormElement';
+export * from './TreeGraph';
 export * from './Delegate';
 export * from './Distribution';
 export * from './Form';
