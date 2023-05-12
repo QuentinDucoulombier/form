@@ -190,8 +190,8 @@ public class DefaultDistributionService implements DistributionService {
                     "date_sending, date_response, active, id FROM " + DISTRIBUTION_TABLE + " WHERE id = ? RETURNING *" +
                 "), " +
                 "newResponses AS (" +
-                    "INSERT INTO " + RESPONSE_TABLE + " (question_id, answer, responder_id, choice_id, distribution_id, original_id, custom_answer) " +
-                    "SELECT question_id, answer, responder_id, choice_id, (SELECT id FROM newDistrib), id, custom_answer " +
+                    "INSERT INTO " + RESPONSE_TABLE + " (question_id, answer, responder_id, choice_id, distribution_id, original_id, choice_position, custom_answer) " +
+                    "SELECT question_id, answer, responder_id, choice_id, (SELECT id FROM newDistrib), id, choice_position, custom_answer " +
                     "FROM " + RESPONSE_TABLE + " WHERE distribution_id = ? RETURNING *" +
                 ")," +
                 "newResponseFiles AS (" +
