@@ -14,13 +14,13 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 import org.entcore.common.user.UserInfos;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.*;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.Tables.*;
 
 public class DefaultDistributionService implements DistributionService {
@@ -181,7 +181,8 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void duplicateWithResponses(String distributionId, Handler<Either<String, JsonObject>> handler) {
+    public Future<JsonObject> duplicateWithResponses(String distributionId) {
+        Promise<JsonObject> promise = Promise.promise();
         String query =
                 "WITH newDistrib AS (" +
                     "INSERT INTO " + DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
@@ -202,7 +203,8 @@ public class DefaultDistributionService implements DistributionService {
                 "SELECT * FROM newDistrib;";
 
         JsonArray params = new JsonArray().add(ON_CHANGE).add(distributionId).add(distributionId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise)));
+        return promise.future();
     }
 
     @Override

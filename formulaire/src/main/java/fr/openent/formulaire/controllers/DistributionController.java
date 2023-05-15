@@ -15,6 +15,7 @@ import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
@@ -310,7 +311,16 @@ public class DistributionController extends ControllerHelper {
                     return;
                 }
 
-                distributionService.duplicateWithResponses(distributionId, defaultResponseHandler(request));
+                distributionService.duplicateWithResponses(distributionId)
+                        .onSuccess(result -> {
+                            Renders.renderJson(request, result);
+                        })
+                        .onFailure(err -> {
+                            Renders.renderError(request);
+                            log.error(String.format("[Form@%s::duplicateWithResponses] Failed to create a new distribution with ON_CHANGE status",
+                                    this.getClass().getSimpleName()));
+                        });
+
             });
         });
     }

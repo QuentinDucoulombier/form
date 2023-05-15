@@ -109,9 +109,8 @@ public interface DistributionService {
     /**
      * Duplicate a distribution by id
      * @param distributionId distribution identifier
-     * @param handler function handler returning JsonObject data
      */
-    void duplicateWithResponses(String distributionId, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> duplicateWithResponses(String distributionId);
 
     /**
      * Update a specific distribution
