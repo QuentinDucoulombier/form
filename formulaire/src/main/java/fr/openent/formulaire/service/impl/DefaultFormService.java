@@ -1,8 +1,8 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.I18nKeys;
-import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.FutureHelper;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -26,8 +26,6 @@ import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.core.constants.Tables.*;
-import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
-import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
 public class DefaultFormService implements FormService {
     private final Sql sql = Sql.getInstance();
@@ -531,7 +529,7 @@ public class DefaultFormService implements FormService {
         String query = "SELECT COUNT(DISTINCT f.id) FROM " + FORM_TABLE + " f " +
                 "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
                 "WHERE ((member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action = ?) OR owner_id = ?) AND id IN " + Sql.listPrepared(formIds);
-        JsonArray params = (new fr.wseduc.webutils.collections.JsonArray(groupsAndUserIds))
+        JsonArray params = (new JsonArray(groupsAndUserIds))
                 .add(right)
                 .add(user.getUserId())
                 .addAll(formIds);

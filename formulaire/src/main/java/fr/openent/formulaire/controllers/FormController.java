@@ -1117,7 +1117,7 @@ public class FormController extends ControllerHelper {
                     groupsAndUserIds.addAll(user.getGroupsIds());
                 }
 
-                formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_RIGHT, formIds, hasRightsEvt -> {
+                formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
                     if (hasRightsEvt.isLeft()) {
                         log.error("[Formulaire@exportForms] Fail to check rights for method " + hasRightsEvt);
                         renderInternalError(request, hasRightsEvt);

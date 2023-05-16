@@ -12,7 +12,6 @@ import org.entcore.common.user.UserInfos;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,6 +137,37 @@ public class DefaultFormServiceTest {
         defaultFormService.listSentFormsOpeningToday()
                 .onSuccess(result -> async.complete());
 
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testCheckFormsRights(TestContext ctx) {
+        Async async = ctx.async();
+        UserInfos user = new UserInfos();
+        user.setUserId("44444");
+        List<String> groupsAndUserIds = new ArrayList<>();
+        groupsAndUserIds.add("11111");
+        groupsAndUserIds.add("22222");
+        groupsAndUserIds.add("33333");
+
+        List<String> formIds = new ArrayList<>();
+        formIds.add("1");
+        formIds.add("2");
+        formIds.add("3");;
+        String expectedQuery = "SELECT COUNT(DISTINCT f.id) FROM " + FORM_TABLE + " f " +
+                "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE ((member_id IN " + Sql.listPrepared(groupsAndUserIds)+ " AND action = ?) OR owner_id = ?) AND id IN " + Sql.listPrepared(formIds);
+        JsonArray expectedParams = new JsonArray().addAll(new JsonArray(groupsAndUserIds)).add("manager").add(user.getUserId()).addAll(new JsonArray(formIds));
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultFormService.checkFormsRights(groupsAndUserIds, user, "manager", new JsonArray(formIds), null);
         async.awaitSuccess(10000);
     }
 }
