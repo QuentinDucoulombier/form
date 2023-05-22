@@ -37,6 +37,7 @@ class Controller implements IViewModel {
     formElements: FormElements;
     types: typeof Types;
     matrixType: number;
+    matrixTypes: Types[];
 
     constructor(private $scope: IQuestionItemScope, private $sce: ng.ISCEService) {
         this.types = Types;
@@ -45,6 +46,7 @@ class Controller implements IViewModel {
     $onInit = async () : Promise<void> => {
         this.matrixType = this.question.children.all.length > 0 && this.question.children.all[0].question_type ?
             this.question.children.all[0].question_type : this.types.SINGLEANSWERRADIO;
+        this.matrixTypes = [this.types.SINGLEANSWERRADIO, this.types.MULTIPLEANSWER];
     }
 
     $onDestroy = async () : Promise<void> => {}

@@ -154,7 +154,6 @@ public class DefaultQuestionService implements QuestionService {
         String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                 "mandatory, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) VALUES " +
                 "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
-
         int questionType = question.getInteger(MATRIX_ID, null) != null &&
                 !MATRIX_CHILD_QUESTIONS.contains(question.getInteger(QUESTION_TYPE, 1)) ?
                 QuestionTypes.SINGLEANSWERRADIO.getCode() :

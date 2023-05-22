@@ -101,8 +101,8 @@ public enum QuestionTypes {
    */
   public static List<Integer> getMatrixChildQuestions() {
     List<Integer> matrixChildQuestions = new ArrayList<>();
-    matrixChildQuestions.add(QuestionTypes.SINGLEANSWER.getCode());
     matrixChildQuestions.add(QuestionTypes.SINGLEANSWERRADIO.getCode());
+    matrixChildQuestions.add(QuestionTypes.MULTIPLEANSWER.getCode());
     return matrixChildQuestions;
   }
 
