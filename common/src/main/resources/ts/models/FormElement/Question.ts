@@ -197,7 +197,7 @@ export class Question extends FormElement {
     isMatrixSingle = () : boolean => {
         return this.question_type == Types.MATRIX
             && this.children.all.length > 0 &&
-            this.children.all[0].question_type == Types.SINGLEANSWER;
+            this.children.all[0].question_type == Types.SINGLEANSWERRADIO;
     }
 
     isMatrixMultiple = () : boolean => {

@@ -106,10 +106,15 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                                 <tr ng-repeat="child in vm.question.children.all | orderBy:matrix_position" ng-init="childIndex = $index">
                                     <td>[[child.title]]</td>
                                     <td ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
-                                        <label>
+                                        <label ng-if="vm.question.isMatrixSingle()">
                                             <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice, child)">
                                             <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice, child)">
                                             <span style="cursor: default"></span>
+                                        </label>
+                                        <label ng-if="vm.question.isMatrixMultiple()">
+                                            <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice, child)">
+                                            <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice, child)">
+                                            <span></span>
                                         </label>
                                     </td>
                                 </tr>

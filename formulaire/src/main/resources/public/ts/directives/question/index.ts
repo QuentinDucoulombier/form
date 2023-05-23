@@ -6,4 +6,4 @@ export * from './element-item-organization';
 export * from './question-title/question-title.directive';
 export * from './question-type';
 export * from './recap-question-item';
-export * from './respond-matrix';
+export * from './respond-matrix/respond-matrix.directive';
