@@ -180,6 +180,8 @@ public class Fields {
     public static final String IS_CONDITIONAL = "is_conditional";
     public static final String IS_CURSOR = "is_cursor";
     public static final String IS_MATRIX = "is_matrix";
+    public static final String IS_MATRIX_MULTIPLE = "is_matrix_multiple";
+    public static final String IS_MATRIX_SINGLE = "is_matrix_single";
     public static final String IS_QUESTION = "is_question";
     public static final String IS_RANKING = "is_ranking";
     public static final String IS_VALID = "is_valid";

@@ -272,7 +272,12 @@
                             <th style="border-right: 1px solid black; padding: 5px;">{{title}}</th>
                             {{#choices}}
                             <td style="border-right: 1px solid black; padding: 5px; text-align: center;">
-                                <input type="radio"/>
+                                {{#is_matrix_single}}
+                                    <input type="radio"/>
+                                {{/is_matrix_single}}
+                                {{#is_matrix_multiple}}
+                                    <input type="checkbox"/>
+                                {{/is_matrix_multiple}}
                             </td>
                             {{/choices}}
                         </tr>
@@ -378,7 +383,12 @@
                                 <th>{{title}}</th>
                                 {{#choices}}
                                 <td >
-                                    <input type="radio"/>
+                                    {{#is_matrix_single}}
+                                        <input type="radio"/>
+                                    {{/is_matrix_single}}
+                                    {{#is_matrix_multiple}}
+                                        <input type="checkbox"/>
+                                    {{/is_matrix_multiple}}
                                 </td>
                                 {{/choices}}
                             </tr>
