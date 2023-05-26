@@ -1,0 +1,93 @@
+<div class="question">
+    <div class="question-title">
+        <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red; margin-left:10px">*</span></h4>
+    </div>
+    <div class="question-main">
+        <div ng-if="vm.question.question_type == vm.types.FREETEXT">
+            <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.SHORTANSWER">
+            <div data-ng-bind-html="vm.getStringResponse()"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.LONGANSWER">
+            <div data-ng-bind-html="vm.getStringResponse()"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER">
+            <div data-ng-bind-html="vm.getStringResponse()"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">
+            <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                <label>
+                    <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                    <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
+                    <span style="cursor: default"></span>
+                    <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                    <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
+                </label>
+            </div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.DATE">
+            <div data-ng-bind-html="vm.getStringResponse()"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.TIME">
+            <div data-ng-bind-html="vm.getStringResponse()"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.FILE">
+            <div ng-repeat="filename in vm.getResponseFileNames()">
+                <span data-ng-bind-html="vm.getHtmlDescription(filename)"></span>
+            </div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO">
+            <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                <label>
+                    <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                    <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
+                    <span style="cursor: default"></span>
+                    <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                    <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
+                </label>
+            </div>
+        </div>
+        <table ng-if="vm.question.question_type == vm.types.MATRIX" class="twelve matrix-table">
+            <thead>
+            <tr>
+                <th class="two"></th>
+                <th ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">[[choice.value]]</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="child in vm.question.children.all | orderBy:matrix_position" ng-init="childIndex = $index">
+                <td>[[child.title]]</td>
+                <td ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                    <label ng-if="vm.question.isMatrixSingle()">
+                        <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice, child)">
+                        <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice, child)">
+                        <span style="cursor: default"></span>
+                    </label>
+                    <label ng-if="vm.question.isMatrixMultiple()">
+                        <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice, child)">
+                        <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice, child)">
+                        <span></span>
+                    </label>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div ng-if="vm.question.question_type == vm.types.CURSOR">
+            <span><i18n>formulaire.selected.value</i18n></span>
+            <span ng-bind-html="vm.getStringResponse()"></span>
+        </div>
+        <div ng-if="vm.question.question_type == vm.types.RANKING">
+            <div ng-repeat="resp in vm.filterQuestionResponses() | orderBy:['choice_position', 'id']">
+                <label>
+                    <span style="cursor: default"></span>
+                    <span class="ten eight-mobile">[[resp.answer]]</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != vm.DistributionStatus.FINISHED)
+                    && vm.question.question_type != vm.types.FREETEXT">
+        <a ng-click="vm.openQuestion()"><i18n>formulaire.edit</i18n></a>
+    </div>
+</div>

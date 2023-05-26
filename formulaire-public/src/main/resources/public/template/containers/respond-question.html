@@ -19,10 +19,10 @@
                                   question="vm.formElement"
                                   responses="vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)">
             </public-question-item>
-            <public-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
+            <public-respond-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
                            question="vm.formElement"
                            responses="vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)">
-            </public-matrix>
+            </public-respond-matrix>
 
             <!-- Display section -->
             <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">

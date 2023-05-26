@@ -3,16 +3,16 @@
         <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
     </div>
     <div class="question-main">
-        <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
+        <div ng-if="vm.question.question_type == vm.types.FREETEXT">
             <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
+        <div ng-if="vm.question.question_type == vm.types.SHORTANSWER">
             <textarea ng-model="vm.responses.all[0].answer" i18n-placeholder="[[vm.question.placeholder || 'formulaire.question.type.SHORTANSWER']]" input-guard></textarea>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
+        <div ng-if="vm.question.question_type == vm.types.LONGANSWER">
             <editor ng-model="vm.responses.all[0].answer" input-guard></editor>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
+        <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER">
             <select ng-model="vm.responses.all[0].choice_id" input-guard>
                 <option ng-value="">[[vm.I18n.translate('formulaire.options.select')]]</option>
                 <option ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" ng-value="choice.id">[[choice.value]]</option>
@@ -22,7 +22,7 @@
                 <input type="text" ng-model="vm.responses.all[0].custom_answer" i18n-placeholder="formulaire.response.custom.write">
             </div>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
+        <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">
             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                 <label>
                     <input type="checkbox" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].selected" input-guard>
@@ -35,18 +35,18 @@
                 </label>
             </div>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.DATE">
+        <div ng-if="vm.question.question_type == vm.types.DATE">
             <date-picker ng-model="vm.responses.all[0].answer" input-guard></date-picker>
             <i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.resetDate()"></i>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.TIME">
+        <div ng-if="vm.question.question_type == vm.types.TIME">
             <input type="time" ng-model="vm.responses.all[0].answer" input-guard/>
             <i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.responses.all[0].answer = null;"></i>
         </div>
-        <div ng-if="vm.question.question_type == vm.Types.FILE">
+        <div ng-if="vm.question.question_type == vm.types.FILE">
             <formulaire-picker-file files="vm.files" multiple="true" input-guard></formulaire-picker-file>
         </div>
-        <div ng-if ="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
+        <div ng-if ="vm.question.question_type == vm.types.SINGLEANSWERRADIO">
             <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                 <label>
                     <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
@@ -61,7 +61,7 @@
                 </label>
             </div>
         </div>
-        <div ng-if ="vm.question.question_type == vm.Types.CURSOR">
+        <div ng-if ="vm.question.question_type == vm.types.CURSOR">
             <div class="formulaire-cursor-input-wrapper">
                 <div class="formulaire-cursor-input-label">
                     <label>[[vm.question.cursor_min_label]]</label> <!-- label minimum value (optional) -->
@@ -96,7 +96,7 @@
                 </div>
             </div>
         </div>
-        <div class="drag" ng-if="vm.question.question_type == vm.Types.RANKING">
+        <div class="drag" ng-if="vm.question.question_type == vm.types.RANKING">
             <ul class="drag-container">
                 <li class="row-shadow-effect"
                     ng-repeat="resp in vm.responses.all | orderBy:['choice_position', 'id']">

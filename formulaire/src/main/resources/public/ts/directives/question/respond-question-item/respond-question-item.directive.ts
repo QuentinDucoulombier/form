@@ -22,7 +22,7 @@ interface IRespondQuestionItemScopeProps {
     distribution: Distribution;
     direction: typeof Direction;
     files: Array<File>;
-    Types: typeof Types;
+    types: typeof Types;
     I18n: I18nUtils;
     mapChoiceResponseIndex: Map<QuestionChoice, number>;
 }
@@ -49,12 +49,12 @@ class Controller implements ng.IController, IViewModel {
     distribution: Distribution;
     direction: typeof Direction;
     files: Array<File>;
-    Types: typeof Types;
+    types: typeof Types;
     I18n: I18nUtils;
     mapChoiceResponseIndex: Map<QuestionChoice, number>;
 
     constructor(private $scope: IRespondQuestionItemScope, private $sce: ng.ISCEService) {
-        this.Types = Types;
+        this.types = Types;
         this.I18n = I18nUtils;
         this.direction = Direction;
     }
