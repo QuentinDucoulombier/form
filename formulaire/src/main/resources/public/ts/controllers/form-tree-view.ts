@@ -60,37 +60,62 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             let svg: any = d3.select("svg");
             let inner: any = svg.select("g");
 
-            // Set up zoom support
-            // let zoom = d3.zoom().scaleExtent([0.1, 1]).on('zoom', function(e) {
-            //     d3.select('canvas').attr('transform', e.transform)
-            // });
-            // let zoom = d3.zoom()
-            //     .on("zoom", function(e) {
-            //         inner.attr("transform", "translate(" + e.translate + ")" + "scale(" + e.scale + ")");
-            //     });
-            let zoom = d3.zoom();
+            //Set up zoom support
+            let zoom = d3.zoom().scaleExtent([0.1, 2]).on('zoom', function(e) {
+                inner.attr('transform', e.transform);
+            });
             svg.call(zoom);
+
+            // Set up drag support
+            let isDragging = false;
+            let prevX = 0;
+            let prevY = 0;
+
+            svg.on('mousedown', function(e) {
+                isDragging = true;
+                prevX = e.clientX;
+                prevY = e.clientY;
+            });
+
+            svg.on('mousemove', function(e) {
+                if (isDragging) {
+                    let deltaX = e.clientX - prevX;
+                    let deltaY = e.clientY - prevY;
+
+                    inner.attr('transform', `translate(${deltaX},${deltaY})`);
+                    prevX = e.clientX;
+                    prevY = e.clientY;
+                }
+            });
+
+            svg.on('mouseup', function() {
+                isDragging = false;
+            });
 
             // Run the renderer. This is what draws the final graph.
             render_graph(render, nodes, edgeList, inner, svg);
 
             // Center the graph
-            // let xCenterOffset = (svg.attr("width") - graph.graph().width) / 2;
-            // inner.attr("transform", "translate(" + xCenterOffset + ", 20)");
-            // svg.attr("height", graph.graph().height + 40);
-
-            // let initialScale = 0.75;
-            // zoom.translate([(svg.attr("width") - graph.graph().width * initialScale) / 2, 20])
-            //     .scale(initialScale)
-            //     .event(svg);
-            // svg.attr('width', window.innerWidth - 100 - 22);
             let innerInfos: any = inner._groups[0][0].getBoundingClientRect();
-            svg.attr("width", innerInfos.width + 40);
+            // Get the current width of the inner SVG element
+            let innerWidth: number = innerInfos.width;
+            let offset: number = 800;
+            let newWidth: number = innerWidth + offset; // Increase the width by 100 pixels
+
+            // Set the new width of the SVG element
+            svg.attr("width", newWidth);
+
+            // Calculate the translation offset to center the content
+            let xCenterOffset: number = (newWidth - innerWidth) / 2;
+
+            // Update the transformation of the inner group
+            inner.attr("transform", "translate(" + xCenterOffset + ", 0)");
+
             svg.attr("height", innerInfos.height + 40);
+
         }
 
         // List initializations
-
         const initNodes = () : any[] => {
             let recapElement: any = {
                 id: null,
