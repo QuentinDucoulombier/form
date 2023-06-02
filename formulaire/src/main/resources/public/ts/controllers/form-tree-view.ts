@@ -79,7 +79,7 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             // inner.attr("transform", "translate(" + xCenterOffset + ", 20)");
             // svg.attr("height", graph.graph().height + 40);
 
-            let initialScale = 0.75;
+            // let initialScale = 0.75;
             // zoom.translate([(svg.attr("width") - graph.graph().width * initialScale) / 2, 20])
             //     .scale(initialScale)
             //     .event(svg);
@@ -194,8 +194,8 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             for (let edge of edges) {
                 g.setEdge.apply(g, edge);
             }
-            g.graph().rankdir = "TB";
-            g.graph().nodesep = 60;
+            g.graph().rankdir = "TB"; // Direction of the flow of the graph TopBottom (TB) or LeftRight (LR)...
+            g.graph().nodesep = 60; // Space between each node
             render(inner, g);
         }
 
