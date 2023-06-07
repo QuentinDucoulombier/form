@@ -72,11 +72,11 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
 
             // Center the graph
             const vw: number = window.innerWidth - (window.innerWidth * 8 / 100);
-            svg.attr('width', vw);
+            const vh: number = window.innerHeight - (window.innerHeight * 30 / 100);
+            svg.attr('width', vw).attr('height', vh);
             let initialScale: number = 0.75;
             if(mainGraph != null){
                 svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - mainGraph.graph().width * initialScale) / 2, 20).scale(initialScale));
-                svg.attr('height', mainGraph.graph().height * initialScale + 300);
             }
         }
 
