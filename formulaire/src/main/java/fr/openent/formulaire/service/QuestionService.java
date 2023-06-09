@@ -54,6 +54,14 @@ public interface QuestionService {
      */
     void export(String formId, boolean isPdf, Handler<Either<String, JsonArray>> handler);
 
+
+    /**
+     * List all the questions of a specific form without freetext questions
+     * @param formId form identifier
+     * @param isPdf is export for PDF
+     */
+    Future<JsonArray> export(String formId, boolean isPdf);
+
     /**
      * Get a specific question by id
      * @param questionId question identifier
