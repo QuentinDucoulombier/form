@@ -3,6 +3,8 @@ import {FormElement, Question, Section} from "../../models";
 import {questionService, sectionService} from "../../services";
 import {DataUtils, FormElementUtils} from "../../utils";
 import http from "axios";
+import * as fs from "fs";
+import * as JSONStream from "jsonstream";
 
 export interface FormElementService {
     countFormElements(formId: number) : Promise<any>;
@@ -91,7 +93,27 @@ export const formElementService: FormElementService = {
                 return sectionService.update(sections);
             }
             else if (sections.length > 0 && questions.length > 0) {
-                return DataUtils.getData(await http.put(`/formulaire/forms/${formElements[0].form_id}/elements`, formElements));
+                let out = "[";
+                for (let i = 0; i < formElements.length - 1; i++) {
+                    const cache = new Set();
+                    const jsonString = JSON.stringify(formElements[i], (key, value) => {
+                        if (typeof value === 'object' && value !== null) {
+                            if (cache.has(value)) {
+                                // Circular reference found, discard key
+                                return;
+                            }
+                            // Store value in our collection
+                            cache.add(value);
+                        }
+                        return value;
+                    });
+                    if (jsonString) {
+                        out += jsonString + ",";
+                    }
+                }
+                out += JSON.stringify(formElements[formElements.length - 1]) + "]";
+                const result = await http.put(`/formulaire/forms/${formElements[0].form_id}/elements`, out);
+                return DataUtils.getData(result);
             }
             else {
                 return [];

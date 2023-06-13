@@ -53,7 +53,26 @@ export const sectionService: SectionService = {
             if (sections.length <= 0) {
                 return [];
             }
-            let data = DataUtils.getData(await http.put(`/formulaire/forms/${sections[0].form_id}/sections`, sections));
+            let out = "[";
+            for (let i = 0; i < sections.length - 1; i++) {
+                const cache = new Set();
+                const jsonString = JSON.stringify(sections[i], (key, value) => {
+                    if (typeof value === 'object' && value !== null) {
+                        if (cache.has(value)) {
+                            // Circular reference found, discard key
+                            return;
+                        }
+                        // Store value in our collection
+                        cache.add(value);
+                    }
+                    return value;
+                });
+                if (jsonString) {
+                    out += jsonString + ",";
+                }
+            }
+            out += JSON.stringify(sections[sections.length - 1]) + "]";
+            let data = DataUtils.getData(await http.put(`/formulaire/forms/${sections[0].form_id}/sections`, out));
             let updatedSections = Mix.castArrayAs(Section, data);
             for (let section of updatedSections) {
                 await section.questions.sync(section.id, true);

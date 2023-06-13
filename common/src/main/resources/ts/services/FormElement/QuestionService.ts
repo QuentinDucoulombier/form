@@ -63,7 +63,27 @@ export const questionService: QuestionService = {
             if (questions.length <= 0) {
                 return []
             }
-            return Mix.castArrayAs(Question, DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questions)));
+            let out = "[";
+            for (let i = 0; i < questions.length - 1; i++) {
+                const cache = new Set();
+                const jsonString = JSON.stringify(questions[i], (key, value) => {
+                    if (typeof value === 'object' && value !== null) {
+                        if (cache.has(value)) {
+                            // Circular reference found, discard key
+                            return;
+                        }
+                        // Store value in our collection
+                        cache.add(value);
+                    }
+                    return value;
+                });
+                if (jsonString) {
+                    out += jsonString + ",";
+                }
+            }
+            out += JSON.stringify(questions[questions.length - 1]) + "]";
+            const result = DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, out));
+            return Mix.castArrayAs(Question, result);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
             throw err;

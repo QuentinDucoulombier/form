@@ -2,6 +2,8 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.UtilsHelper;
+import fr.openent.formulaire.helpers.ApiVersionHelper;
+import fr.openent.formulaire.helpers.JsonHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.*;
@@ -273,7 +275,7 @@ public class QuestionController extends ControllerHelper {
                 return;
             }
 
-            RequestUtils.bodyToJsonArray(request, questions -> {
+            JsonHelper.bodyToJsonArrayNoXss(request, questions -> {
                 if (questions == null || questions.isEmpty()) {
                     log.error("[Formulaire@QuestionController::update] No questions to update.");
                     noContent(request);
