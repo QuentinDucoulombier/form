@@ -24,6 +24,7 @@ interface ViewModel {
     filesList: any;
     form: Form;
     nbFormElements: number;
+    longestPath: number;
     loading : boolean;
     historicPosition: number[];
     currentResponses: Map<Question, Responses>;
@@ -47,6 +48,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbFormElements = 1;
+    vm.longestPath = 1;
     vm.loading = true;
     vm.currentResponses = new Map();
     vm.currentFiles = new Map();
@@ -65,9 +67,34 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.historicPosition = $scope.historicPosition.length > 0 ? $scope.historicPosition : [1];
 
         initFormElementResponses();
-
+        vm.longestPath = findLongestPath(vm.formElement.id, vm.formElements);
         window.setTimeout(() => vm.loading = false,500);
         $scope.safeApply();
+    }
+
+
+    const findLongestPath = (nodeId: number, nodes: FormElements): number => {
+        //TODO vérifier les autres types de questions sans choix mais avec un next_form_element_id
+        let currentNode: any = nodes.all.find(node => node.id === nodeId);
+        let choices: any[] = currentNode.isSection ? (<Section>currentNode).questions.all.map(elm => elm.choices.all) : (<Question>currentNode).choices.all;
+        let paths: number[] = [];
+        if(!choices)return 1;
+        for (let choice of choices) {
+            if (!choice.next_form_element_id) {
+                paths.push(1)
+            } else {
+                paths.push(recursivePathFinder(choice.next_form_element_id, nodes));
+            }
+        }
+        return Math.max(...paths + 1);
+    }
+
+
+    const recursivePathFinder = (nodeId: number, nodes: FormElements): number => {
+        let subChoice: any = nodes.all.find(node => node.id === nodeId);
+        let subChoices: any[] = subChoice.isSection ? (<Section>subChoice).questions.all.map(elm => elm.choices.all) : (<Question>subChoice).choices.all;
+        if(!subChoices)return 1;
+        return Math.max(subChoices.map(elemt => recursivePathFinder(elemt.next_form_element_id, nodes)) + 1);
     }
 
     const initFormElementResponses = () : void => {

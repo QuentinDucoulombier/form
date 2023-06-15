@@ -4,6 +4,7 @@ import {FormElement} from "../models";
 interface IViewModel {
     formElement: FormElement,
     nbFormElements: number
+    longestPath: number;
 }
 
 export const progressBubbleBar: Directive = ng.directive('progressBubbleBar', () => {
@@ -11,7 +12,8 @@ export const progressBubbleBar: Directive = ng.directive('progressBubbleBar', ()
         restrict: 'E',
         scope: {
             formElement: '=',
-            nbFormElements: '='
+            nbFormElements: '=',
+            longestPath: '='
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -20,6 +22,11 @@ export const progressBubbleBar: Directive = ng.directive('progressBubbleBar', ()
                 <ul class="progressbar six twelve-mobile">
                     <li ng-repeat="n in [].constructor(vm.nbFormElements) track by $index"
                         ng-class="{ active: $index+1 <= vm.formElement.position }"></li>
+                </ul>
+            </div>
+            <div class="progressbar-container" ng-if="vm.longestPath > 1">
+                <ul class="progressbar six twelve-mobile">
+                    <li ng-repeat="n in [].constructor(vm.longestPath) track by $index"
                 </ul>
             </div>
         `,
