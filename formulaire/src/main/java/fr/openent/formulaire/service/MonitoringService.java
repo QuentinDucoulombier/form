@@ -20,4 +20,9 @@ public interface MonitoringService {
      * @param nullyfiedElements ids of the nullyfied elements
      */
     Future<JsonArray> cleanPositionDuplicates(JsonArray nullyfiedElements);
+
+    /**
+     * Get all script files with their execution information.
+     */
+    Future<JsonArray> getScripts();
 }

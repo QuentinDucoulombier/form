@@ -74,4 +74,23 @@ public class MonitoringController extends ControllerHelper {
                 renderError(request);
             });
     }
+
+    @Get("/scripts")
+    @ApiDoc("Get all scripts")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(SuperAdminFilter.class)
+    public void getAllScripts(HttpServerRequest request) {
+        monitoringService.getScripts()
+                .onSuccess(result -> {
+                    if (result.isEmpty()) {
+                        String message = "No script found.";
+                        result.add(new JsonObject().put(MESSAGE, message));
+                    }
+                    renderJson(request, result);
+                })
+                .onFailure(err -> {
+                    log.error(err.getMessage());
+                    renderError(request);
+                });
+    }
 }

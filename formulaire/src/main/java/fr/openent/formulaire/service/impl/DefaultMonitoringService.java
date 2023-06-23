@@ -134,4 +134,24 @@ public class DefaultMonitoringService implements MonitoringService {
 
         return promise.future();
     }
+
+    @Override
+    public Future<JsonArray> getScripts() {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray values = new JsonArray();
+        String query = "SELECT * FROM formulaire.scripts";
+
+
+        sql.prepared(query, values, SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                promise.fail(event.left().getValue());
+            } else {
+                promise.complete(event.right().getValue());
+            }
+        }));
+
+        return promise.future();
+    }
+
 }
