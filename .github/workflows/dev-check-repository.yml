@@ -18,6 +18,8 @@ jobs:
         run: node_modules/gulp/bin/gulp.js build
       - name: Run test
         run: yarn test
+      - name: Run build node sass
+        run: yarn run build:sass
 
   build-gradle-test:
     runs-on: ubuntu-latest

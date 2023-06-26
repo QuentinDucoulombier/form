@@ -37,6 +37,14 @@ buildGulp() {
     docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js build"
 }
 
+formulaire:buildGulp() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js build --targetModule=formulaire"
+}
+
+formulairePublic:buildGulp() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js build --targetModule=formulaire-public"
+}
+
 buildCss() {
     docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn run build:sass"
 }
@@ -125,6 +133,12 @@ do
       ;;
     buildGulp)
       buildGulp
+      ;;
+    formulaire:buildGulp)
+      formulaire:buildGulp
+      ;;
+    formulairePublic:buildGulp)
+      formulairePublic:buildGulp
       ;;
     buildCss)
       buildCss
