@@ -77,7 +77,7 @@ public class MonitoringController extends ControllerHelper {
 
     @Get("/scripts")
     @ApiDoc("Get all scripts")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(SuperAdminFilter.class)
     public void getAllScripts(HttpServerRequest request) {
         monitoringService.getScripts()

@@ -139,19 +139,11 @@ public class DefaultMonitoringService implements MonitoringService {
     public Future<JsonArray> getScripts() {
         Promise<JsonArray> promise = Promise.promise();
 
-        JsonArray values = new JsonArray();
         String query = "SELECT * FROM formulaire.scripts";
 
-
-        sql.prepared(query, values, SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                promise.fail(event.left().getValue());
-            } else {
-                promise.complete(event.right().getValue());
-            }
-        }));
+        String errorMessage = "[Formulaire@DefaultMonitoringService::getScripts] Fail to get scripts information : ";
+        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
     }
-
 }
