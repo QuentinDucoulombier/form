@@ -23,3 +23,5 @@
 /gradlew.bat
 /rev-manifest.json
 /package-lock.json
+/formulaire/src/main/resources/public/css/
+/yarn.lock

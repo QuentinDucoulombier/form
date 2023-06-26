@@ -98,10 +98,22 @@
       &-camembert, &-histogram {
         display: flex;
         justify-content: center;
+
+        &-cursor {
+          flex-direction: column;
+        }
       }
 
       .apexcharts-toolbar {
         display: none;
+      }
+    }
+
+    .custom-answers {
+      margin-top: 2%;
+
+      &-title {
+        font-style: italic;
       }
     }
 

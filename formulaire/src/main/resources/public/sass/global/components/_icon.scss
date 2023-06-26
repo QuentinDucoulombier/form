@@ -82,15 +82,28 @@ i {
     }
   }
 
+  &.cursor {
+    &-pointer {
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+
   // Icons content
 
-  &.dropbtn::before{
+  &.dropbtn::before {
     content: '\e912';
   }
 
   &.i-bell::before {
     font-family: 'formulaire-mdi';
     content: "\F09C";
+  }
+
+  &.i-earth::before {
+    font-family: 'formulaire-mdi';
+    content: "\F1E7";
   }
 
   &.i-cancel::before {
@@ -217,5 +230,21 @@ i {
   &.i-reload::before {
     font-family: 'formulaire-mdi';
     content: "\F453";
+  }
+
+  &.i-restore::before {
+    font-family: 'formulaire-mdi';
+    content: "\F99A";
+  }
+
+  &.i-image::before {
+    font-family: 'formulaire-mdi';
+    content: "\F2E9";
+    color: $formulaire-orange;
+  }
+
+  &.i-close::before {
+    font-family: 'formulaire-mdi';
+    content: "\F159";
   }
 }
