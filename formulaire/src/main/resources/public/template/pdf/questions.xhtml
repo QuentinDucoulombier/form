@@ -87,6 +87,11 @@
 
         .input-radio-checkbox {
             display: flex;
+            flex-direction: row;
+        }
+
+        .input-radio-checkbox .choice {
+            display: flex;
             flex-direction: column;
         }
 
@@ -186,6 +191,17 @@
             margin-bottom: 2px;
         }
 
+        .image-container {
+            position: relative;
+            width: 125px;
+        }
+
+        .image-container img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
     </style>
 </head>
 
@@ -229,11 +245,14 @@
                         <div class="input-radio-checkbox">
                             {{#radio_btn}}
                                 {{#choices}}
-                                <div>
+                            <div class="choice">
                                     <input type="radio"/><label>{{value}}</label>
                                     {{#is_conditional}}
                                         (Aller à : {{title_next}})
                                     {{/is_conditional}}
+                                    <div class="image-container">
+                                        {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
+                                    </div>
                                 </div>
                                 {{/choices}}
                             {{/radio_btn}}
@@ -242,11 +261,14 @@
                         <!-- Multiple answer -->
                         <div class="input-radio-checkbox">
                             {{#multiple_choice}}
-                            {{#choices}}
-                            <div>
-                                <input type="checkbox"/><label>{{value}}</label>
-                            </div>
-                            {{/choices}}
+                                {{#choices}}
+                                <div class="choice">
+                                    <input type="checkbox"/><label>{{value}}</label>
+                                    <div class="image-container">
+                                        {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
+                                    </div>
+                                </div>
+                                {{/choices}}
                             {{/multiple_choice}}
                         </div>
 
@@ -339,14 +361,17 @@
                         <!-- Single answer, radio btn -->
                         <div class="input-radio-checkbox">
                             {{#radio_btn}}
-                            {{#choices}}
-                            <div>
-                                <input type="radio"/><label>{{value}}</label>
-                                {{#is_conditional}}
-                                    (Aller à : {{title_next}})
-                                {{/is_conditional}}
-                            </div>
-                            {{/choices}}
+                                {{#choices}}
+                                <div class="choice">
+                                    <input type="radio"/><label>{{value}}</label>
+                                    {{#is_conditional}}
+                                        (Aller à : {{title_next}})
+                                    {{/is_conditional}}
+                                    <div class="image-container">
+                                        {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
+                                    </div>
+                                </div>
+                                {{/choices}}
                             {{/radio_btn}}
                         </div>
 
@@ -354,8 +379,11 @@
                         <div class="input-radio-checkbox">
                             {{#multiple_choice}}
                                 {{#choices}}
-                                <div>
+                                <div class="choice">
                                     <input type="checkbox"/><label>{{value}}</label>
+                                    <div class="image-container">
+                                        {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
+                                    </div>
                                 </div>
                                 {{/choices}}
                             {{/multiple_choice}}

@@ -15,6 +15,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.*;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -50,6 +51,7 @@ public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
     private final EventStore eventStore;
     private final Storage storage;
+    private final EventBus eb;
     private final FormService formService;
     private final DistributionService distributionService;
     private final QuestionChoiceService questionChoiceService;
@@ -58,10 +60,11 @@ public class FormController extends ControllerHelper {
     private final FolderService folderService;
     private final RelFormFolderService relFormFolderService;
 
-    public FormController(EventStore eventStore, Storage storage) {
+    public FormController(EventStore eventStore, Storage storage, EventBus eb) {
         super();
         this.eventStore = eventStore;
         this.storage = storage;
+        this.eb = eb;
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
@@ -1170,7 +1173,7 @@ public class FormController extends ControllerHelper {
                                     notFound(request, errMessage);
                                 }
                                 JsonObject form = formEvt.right().getValue();
-                                new FormQuestionsExportPDF(request, vertx, config, storage, form).launch();
+                                new FormQuestionsExportPDF(request, vertx, config, storage, eb, form).launch();
                             });
                             break;
                         default:

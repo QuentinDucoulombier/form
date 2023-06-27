@@ -39,7 +39,7 @@ public class UtilsController extends ControllerHelper {
         String idImage = request.getParam(PARAM_ID_IMAGE);
 
         if (idImage == null || idImage.equals("")) {
-            String message = "[Formulaire@getInfoImg] The image id must not be empty.";
+            String message = "[Formulaire@UtilsController::getInfoImg] The image id must not be empty.";
             log.error(message);
             badRequest(request, message);
             return;
@@ -48,7 +48,7 @@ public class UtilsController extends ControllerHelper {
         JsonObject action = new JsonObject().put(ACTION, "getDocument").put(ID, idImage);
         eb.request(WORKSPACE_ADDRESS, action, handlerToAsyncHandler(infos -> {
             if (!infos.body().getString(STATUS).equals(OK)) {
-                String message = "[Formulaire@getInfoImg] Failed to get info for image with id : " + idImage;
+                String message = "[Formulaire@UtilsController::getInfoImg] Failed to get info for image with id : " + idImage;
                 log.error(message);
                 renderInternalError(request, infos.body().getJsonObject(RESULT).toString());
             }
@@ -74,7 +74,7 @@ public class UtilsController extends ControllerHelper {
                 renderJson(request, jsonFiles);
             })
             .onFailure(err -> {
-                log.error("[Formulaire@postMultipleImages] An error has occurred during upload files : " + err.getMessage());
+                log.error("[Formulaire@UtilsController::postMultipleImages] An error has occurred during upload files : " + err.getMessage());
                 renderInternalError(request, err.getMessage());
             });
     }

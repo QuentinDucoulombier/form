@@ -13,16 +13,15 @@ import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import fr.wseduc.webutils.data.FileResolver;
 import fr.wseduc.webutils.http.Renders;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.bus.WorkspaceHelper;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.pdf.Pdf;
 import org.entcore.common.pdf.PdfFactory;
@@ -52,13 +51,17 @@ public class FormQuestionsExportPDF extends ControllerHelper {
     private final QuestionSpecificFieldsService questionSpecificFieldsService = new DefaultQuestionSpecificFieldsService();
     private final QuestionChoiceService questionChoiceService = new DefaultQuestionChoiceService();
     private final PdfFactory pdfFactory;
+    private final Storage storage;
+    private final EventBus eb;
 
-    public FormQuestionsExportPDF(HttpServerRequest request, Vertx vertx, JsonObject config, Storage storage, JsonObject form) {
+    public FormQuestionsExportPDF(HttpServerRequest request, Vertx vertx, JsonObject config, Storage storage, EventBus eb, JsonObject form) {
         this.request = request;
         this.config = config;
         this.vertx = vertx;
         this.renders = new Renders(this.vertx, config);
         this.form = form;
+        this.storage = storage;
+        this.eb = eb;
         pdfFactory = new PdfFactory(vertx, new JsonObject().put(NODE_PDF_GENERATOR, config.getJsonObject(NODE_PDF_GENERATOR, new JsonObject())));
     }
 
@@ -100,6 +103,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                             Map<Integer, Integer> mapSectionIdPositionList = new HashMap<>();
                             Map<Integer, JsonObject> mapQuestions = new HashMap<>();
                             Map<Integer, JsonObject> mapSections = new HashMap<>();
+                            List<Future> imageInfos = new ArrayList<>();
 
                             for (int i = 0; i < sectionsInfos.size(); i++) {
                                 JsonObject sectionInfo = sectionsInfos.getJsonObject(i);
@@ -110,7 +114,6 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                 int id = sectionInfo.getInteger(ID);
                                 mapSections.put(id, sectionInfo);
                             }
-
 
                             for (int i = 0; i < questionsInfos.size(); i++) {
                                 JsonObject question = questionsInfos.getJsonObject(i);
@@ -140,7 +143,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                             if (question.containsKey(CONDITIONAL) && question.getBoolean(CONDITIONAL)) {
                                                 question.put(IS_CONDITIONAL, true);
                                             }
-                                        } else {
+                                        }
+                                        else {
                                             // If already exist, add choice to JsonArray
                                             JsonArray choicesArray = question.getJsonArray(CHOICES);
                                             choicesArray.add(choice);
@@ -209,62 +213,100 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                 form_elements.add(question);
                             }
 
+                            // Prepare Futures to get images from document ids
+                            questionsInfos.stream()
+                                .map(JsonObject.class::cast)
+                                .map(questionInfos -> questionInfos.getJsonArray(CHOICES))
+                                .flatMap(JsonArray::stream)
+                                .map(JsonObject.class::cast)
+                                .filter(choice -> choice.containsKey(IMAGE))
+                                .forEach(choice -> imageInfos.add(getImageData(choice)));
 
 
-                            List<JsonObject> sorted_form_elements = form_elements.getList();
-                            Map<Integer, JsonArray> mapQuestionChoices = new HashMap<>();
-                            JsonArray sectionQuestions = new JsonArray();
-                            JsonArray choices = new JsonArray();
-
-                            // Handle next title to conditional questions within sections
-                            for(JsonObject elt: sorted_form_elements){
-                                if (elt.containsKey(QUESTIONS)){
-                                    sectionQuestions.addAll(elt.getJsonArray(QUESTIONS));
+                            // Get choices images, affect them to their respective choice and send the result
+                            CompositeFuture.all(imageInfos).onComplete(evt -> {
+                                if (evt.failed()) {
+                                    log.error("[Formulaire@FormQuestionsExportPDF::FormQuestionsExportPDF] Failed to retrieve choices' image : " + evt.cause());
+                                    Future.failedFuture(evt.cause());
+                                    return;
                                 }
-                            }
 
-                            if(!sectionQuestions.isEmpty()) {
-                                for (int i = 0; i < sectionQuestions.size(); i++) {
-                                    JsonObject question = sectionQuestions.getJsonObject(i);
-                                    if (question.containsKey(CHOICES)) {
-                                        int questionId = question.getInteger(ID);
-                                        mapQuestionChoices.put(questionId, question.getJsonArray(CHOICES));
-                                        choices.addAll(question.getJsonArray(CHOICES));
+                                Map<String, String> localChoicesMap = new HashMap<>();
+                                imageInfos.stream()
+                                    .map(Future::result)
+                                    .map(JsonObject.class::cast)
+                                    .filter(Objects::nonNull)
+                                    .filter(imageInfo -> imageInfo.containsKey(ID) && imageInfo.containsKey(DATA))
+                                    .forEach(imageInfo -> localChoicesMap.put(imageInfo.getString(ID), imageInfo.getString(DATA)));
+
+                                // Affect images to corresponding choices (we have to iterate like previously to keep the same order)
+                                questionsInfos.stream()
+                                    .map(JsonObject.class::cast)
+                                    .map(questionInfos -> questionInfos.getJsonArray(CHOICES))
+                                    .flatMap(JsonArray::stream)
+                                    .map(JsonObject.class::cast)
+                                    .filter(choice -> choice.containsKey(IMAGE))
+                                    .forEach(choice -> {
+                                        String choiceImageId = getImageId(choice);
+                                        String imageData = localChoicesMap.get(choiceImageId);
+                                        choice.put(PARAM_CHOICE_IMAGE, imageData);
+                                    });
+
+                                List<JsonObject> sorted_form_elements = form_elements.getList();
+                                Map<Integer, JsonArray> mapQuestionChoices = new HashMap<>();
+                                JsonArray sectionQuestions = new JsonArray();
+                                JsonArray choices = new JsonArray();
+
+                                // Handle next title to conditional questions within sections
+                                for (JsonObject elt: sorted_form_elements){
+                                    if (elt.containsKey(QUESTIONS)){
+                                        sectionQuestions.addAll(elt.getJsonArray(QUESTIONS));
                                     }
                                 }
-                            }
-                            addNextTitleToQuestionChoices(choices, mapSections, mapQuestions);
 
-
-                            // Update choices with right datas
-                            for (JsonObject elt : sorted_form_elements) {
-                                if (elt.containsKey(QUESTIONS)) {
-                                    JsonArray questions = elt.getJsonArray(QUESTIONS);
-                                    for (int i = 0; i < questions.size(); i++) {
-                                        JsonObject question = questions.getJsonObject(i);
+                                if (!sectionQuestions.isEmpty()) {
+                                    for (int i = 0; i < sectionQuestions.size(); i++) {
+                                        JsonObject question = sectionQuestions.getJsonObject(i);
                                         if (question.containsKey(CHOICES)) {
                                             int questionId = question.getInteger(ID);
-                                            JsonArray choiceToReplace = mapQuestionChoices.get(questionId);
-                                            question.put(CHOICES, choiceToReplace);
+                                            mapQuestionChoices.put(questionId, question.getJsonArray(CHOICES));
+                                            choices.addAll(question.getJsonArray(CHOICES));
                                         }
                                     }
                                 }
-                            };
+                                addNextTitleToQuestionChoices(choices, mapSections, mapQuestions);
 
-                            // Sort sections & questions to display it in the right order
-                            sorted_form_elements.removeIf(element -> element.getInteger(POSITION) == null);
-                            sorted_form_elements.sort(Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
 
-                            JsonObject results = new JsonObject()
-                                    .put(FORM_ELEMENTS, sorted_form_elements)
-                                    .put(FORM_TITLE, form.getString(TITLE));
+                                // Update choices with right datas
+                                for (JsonObject elt : sorted_form_elements) {
+                                    if (elt.containsKey(QUESTIONS)) {
+                                        JsonArray questions = elt.getJsonArray(QUESTIONS);
+                                        for (int i = 0; i < questions.size(); i++) {
+                                            JsonObject question = questions.getJsonObject(i);
+                                            if (question.containsKey(CHOICES)) {
+                                                int questionId = question.getInteger(ID);
+                                                JsonArray choiceToReplace = mapQuestionChoices.get(questionId);
+                                                question.put(CHOICES, choiceToReplace);
+                                            }
+                                        }
+                                    }
+                                }
 
-                            generatePDF(request, results,"questions.xhtml", pdf ->
-                                    request.response()
-                                            .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                            .putHeader("Content-Disposition", "attachment; filename=Questions_" + form.getString(TITLE) + ".pdf")
-                                            .end(pdf)
-                            );
+                                // Sort sections & questions to display it in the right order
+                                sorted_form_elements.removeIf(element -> element.getInteger(POSITION) == null);
+                                sorted_form_elements.sort(Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
+
+                                JsonObject results = new JsonObject()
+                                        .put(FORM_ELEMENTS, sorted_form_elements)
+                                        .put(FORM_TITLE, form.getString(TITLE));
+
+                                generatePDF(request, results,"questions.xhtml", pdf ->
+                                        request.response()
+                                                .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                                .putHeader("Content-Disposition", "attachment; filename=Questions_" + form.getString(TITLE) + ".pdf")
+                                                .end(pdf)
+                                );
+                            });
                         })
                         .onFailure(error -> {
                             String errMessage = String.format("[Formulaire@FormQuestionsExportPDF::launch]  " +
@@ -308,6 +350,40 @@ public class FormQuestionsExportPDF extends ControllerHelper {
         }
         List<JsonObject> choicesList = questionChoices.getList();
         choicesList.sort(Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
+    }
+
+    // Get image data thanks to its id
+    public Future<JsonObject> getImageData(JsonObject choice) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String documentId = getImageId(choice);
+        if (documentId == null || documentId.equals("")) {
+            String errorMessage = "[Formulaire@FormQuestionsExportPDF::getImageData] The document id must not be empty.";
+            log.error(errorMessage);
+            promise.complete(null);
+            return promise.future();
+        }
+
+        WorkspaceHelper workspaceHelper = new WorkspaceHelper(eb, storage);
+        workspaceHelper.readDocument(documentId, documentEvt -> {
+            String graph = Base64.getEncoder().encodeToString(documentEvt.getData().getBytes());
+            graph = "data:" + documentEvt.getDocument().getJsonObject(METADATA, new JsonObject()).getString(CONTENT_TYPE, "image/png") + ";base64," + graph;
+            JsonObject imageInfos = new JsonObject().put(ID, documentId).put(DATA, graph);
+            promise.complete(imageInfos);
+        });
+
+        return promise.future();
+    }
+
+    private String getImageId(JsonObject questionChoice) {
+        String imagePath = questionChoice.getString(IMAGE);
+        return getImageId(imagePath);
+    }
+
+    private String getImageId(String imagePath) {
+        if (imagePath == null) return null;
+        int lastSeparator = imagePath.lastIndexOf(SLASH);
+        return lastSeparator > 0 ? imagePath.substring(lastSeparator + 1) : imagePath;
     }
 
     private void generatePDF(HttpServerRequest request, JsonObject templateProps, String templateName, Handler<Buffer> handler) {

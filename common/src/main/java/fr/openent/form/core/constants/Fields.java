@@ -105,6 +105,7 @@ public class Fields {
     // Request params
     public static final String PARAM_BOOKMARKS_IDS = "bookmarksIds";
     public static final String PARAM_CHOICE_ID = "choiceId";
+    public static final String PARAM_CHOICE_IMAGE = "imageChoice";
     public static final String PARAM_DISPLAY_NAME = "displayName";
     public static final String PARAM_DISTRIBUTION_ID = "distributionId";
     public static final String PARAM_DISTRIBUTION_KEY = "distributionKey";
@@ -142,6 +143,7 @@ public class Fields {
 
 
     // Others
+    public static final String SLASH = "/";
     public static final String _ID = "_id";
     public static final String APPS = "apps";
     public static final String ARCHIVE = "archive";
@@ -159,6 +161,7 @@ public class Fields {
     public static final String CONTENT_TYPE = "content-type";
     public static final String CSV = "csv";
     public static final String CURSOR_AVERAGE = "cursor_average";
+    public static final String DATA = "data";
     public static final String DATE_HOUR = "date_hour";
     public static final String DEFAULT = "DEFAULT";
     public static final String DISTRIBUTION_CAPTCHA = "distribution_captcha";
@@ -188,6 +191,7 @@ public class Fields {
     public static final String IS_RANKING = "is_ranking";
     public static final String IS_VALID = "is_valid";
     public static final String IS_SECTION = "is_section";
+    public static final String HAS_IMAGE = "has_image";
     public static final String KO = "ko";
     public static final String LOCALE = "locale";
     public static final String LONG_ANSWER = "long_answer";

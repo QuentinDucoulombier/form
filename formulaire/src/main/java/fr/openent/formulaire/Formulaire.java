@@ -75,7 +75,7 @@ public class Formulaire extends BaseServer {
 		}
 
 		// Set crud service
-		FormController formController = new FormController(eventStore, storage);
+		FormController formController = new FormController(eventStore, storage, eb);
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, Tables.FORM, Tables.FORM_SHARES));
 
 		// Set sharing service
